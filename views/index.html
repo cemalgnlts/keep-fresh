@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Keep Fresh</title>
+	<link rel="preload" href="/assets/fonts/Inter-Light.woff2" as="font">
+	<link rel="preload" href="/assets/fonts/Inter-Regular.woff2" as="font">
+	<link rel="preload" href="/assets/fonts/Inter-Bold.woff2" as="font">
+	<link rel="icon" href="/favicon.ico" sizes="any">
+	<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+	<link rel="stylesheet" href="/base.css">
+	<script type="module" src="/main.js"></script>
+	<script>
+		document.firstElementChild.classList.toggle("dark", localStorage.getItem("isDark") === "true");
+	</script>
+</head>
+
+<body>
+	<aside class="small">
+		<header>
+			<h1>
+				<svg width="24" height="24" viewBox="0 -960 960 960" aria-hidden="true" class="leaf">
+					<defs>
+						<linearGradient id="brandGradient">
+							<stop offset="0%" stop-color="#B6F492" />
+							<stop offset="100%" stop-color="#338B93" />
+						</linearGradient>
+					</defs>
+					<path fill="url(#brandGradient)"
+						d="M452-108q-43 0-83-10t-73-32q18-96 69-180.5T490-482q-85 53-146 131.5T258-174q-6-6-12-10.5T234-195q-42-44-65-97.5T146-402q0-63 25-119t69-101q73-73 185.5-95t342.5-9q18 215-5.5 334T665-199q-43 45-98 68t-115 23Z" />
+				</svg>
+				Keep Fresh
+			</h1>
+
+			<div class="fill"></div>
+
+			<button title="Toggles light & dark theme" class="btn btn-icon btn-icon-toggle" id="themeBtn"
+				data-isOn="true">
+				<svg viewBox="0 0 24 24" aria-hidden="true" class="icon icon-on">
+					<use href="#iconMoon" />
+				</svg>
+
+				<svg viewBox="0 0 24 24" aria-hidden="true" class="icon icon-off">
+					<use href="#iconSun" />
+				</svg>
+			</button>
+		</header>
+
+		<nav>
+			<ul class="menu">
+				<li class="active">
+					<svg viewBox="0 0 24 24" aria-hidden="true" class="icon">
+						<use href="#iconHome" />
+					</svg>
+					<span class="menu-item-text">Home</span>
+				</li>
+				<li>
+					<svg viewBox="0 0 24 24" aria-hidden="true" class="icon">
+						<use href="#iconSearch" />
+					</svg>
+					<span class="menu-item-text">Search</span>
+				</li>
+			</ul>
+
+			<div class="seperator"></div>
+
+			<ul class="menu">
+				<li id="newBookmarkBtn">
+					<svg viewBox="0 0 24 24" aria-hidden="true" class="icon">
+						<use href="#iconAdd" />
+					</svg>
+					<span class="menu-item-text">Add</span>
+				</li>
+			</ul>
+		</nav>
+	</aside>
+
+	<main>
+		<header>
+			<h1>Bookmarks</h1>
+		</header>
+
+		<section class="content">
+			${bookmarks.map(bookmark => `
+			<figure class="bookmark" data-type="${bookmark.type}" data-key="${bookmark.key}">
+				<div class="bookmark-preview-${bookmark.type}" ${bookmark.image ?
+					`style="--image: url('${bookmark.image}')" ` : "" } ${bookmark.font ?
+					`style="--font: '${bookmark.font}'" data-font="${bookmark.font}" ` : "" }>
+					${bookmark.colors ? bookmark.colors.map(color => `<span style="--color: ${color}"
+						data-color="${color}"></span>`).join("") : ""}
+					${bookmark.font ? "Aa" : ""}
+				</div>
+				<figcaption>
+					<h3 class="bookmark-title">${bookmark.title}</h3>
+					<p class="bookmark-info">${bookmark.info}</p>
+				</figcaption>
+			</figure>
+			`).join("")}
+		</section>
+	</main>
+
+	<!-- Add Bookmark dialog -->
+	<div class="dialog dialog-fancy" id="addBookmarkDialog">
+		<div class="dialog-content">
+			<h1 class="dialog-title">Add New Bookmark</h1>
+
+			<ul class="menu menu-fancy" id="addBookmarkCategoryItems">
+				<li data-type="link">
+					<svg viewBox="0 0 24 24" aria-hidden="true" class="icon">
+						<use href="#iconLink" />
+					</svg>
+					<span class="menu-item-text">Link</span>
+				</li>
+				<li data-type="color-palette">
+					<svg viewBox="0 0 24 24" aria-hidden="true" class="icon">
+						<use href="#iconPalette" />
+					</svg>
+					<span class="menu-item-text">Color Palette</span>
+				</li>
+				<li data-type="font">
+					<svg viewBox="0 0 24 24" aria-hidden="true" class="icon">
+						<use href="#iconFont" />
+					</svg>
+					<span class="menu-item-text">Font</span>
+				</li>
+			</ul>
+		</div>
+
+		<button class="btn dialog-close-btn">
+			<svg viewBox="0 0 24 24" aria-hidden="true" class="icon">
+				<use href="#iconClose" />
+			</svg>
+			ESC
+		</button>
+	</div>
+	<!-- /Add Bookmark dialog -->
+
+	<!-- Add Link dialog -->
+	<div class="dialog" data-for="link">
+		<form action="/" method="post" class="dialog-content bookmark-add-form">
+			<h1 class="dialog-title">Add Link</h1>
+
+			<input type="hidden" name="type" value="link">
+
+			<small>Link</small>
+
+			<!-- Website link -->
+			<label class="input input-fancy">
+				<svg viewBox="0 0 24 24" aria-hidden="true" class="icon">
+					<use href="#iconLink" />
+				</svg>
+				<input placeholder="https://example.com" spellcheck="false" autocorrect="false" name="url" id="linkInp"
+					required>
+				<button class="btn btn-icon" title="Auto fill" id="fetchPageMetaBtn">
+					<svg viewBox="0 0 24 24" aria-hidden="true" class="icon">
+						<use href="#iconSearch" />
+					</svg>
+				</button>
+			</label>
+
+			<small>Meta</small>
+
+			<!-- Website image -->
+			<label class="input">
+				<svg viewBox="0 0 24 24" aria-hidden="true" class="icon">
+					<use href="#iconImage" />
+				</svg>
+				<input placeholder="https://example.com/favicon.ico" spellcheck="false" autocorrect="false" name="image"
+					id="linkImageInp">
+			</label>
+
+			<!-- Website title -->
+			<label class="input">
+				<svg viewBox="0 0 24 24" aria-hidden="true" class="icon">
+					<use href="#iconHashtag" />
+				</svg>
+				<input placeholder="Title" spellcheck="false" autocorrect="false" name="title" id="linkTitleInp"
+					required>
+			</label>
+
+			<!-- Website description -->
+			<label class="input">
+				<svg viewBox="0 0 24 24" aria-hidden="true" class="icon">
+					<use href="#iconInfo" />
+				</svg>
+				<textarea rows="3" placeholder="Info" spellcheck="false" autocorrect="false" name="info"
+					id="linkInfoInp"></textarea>
+			</label>
+
+			<input type="submit" class="btn dialog-complete-btn" value="Save">
+		</form>
+
+		<button class="btn dialog-close-btn">
+			<svg viewBox="0 0 24 24" class="icon">
+				<use href="#iconClose" />
+			</svg>
+			ESC
+		</button>
+	</div>
+	<!-- /Add Link dialog -->
+
+	<!-- Add Color Palette dialog -->
+	<div class="dialog" data-for="color-palette">
+		<form action="/" method="post" class="dialog-content bookmark-add-form">
+			<h1 class="dialog-title">Add Color Palette</h1>
+
+			<input type="hidden" name="type" value="color-palette">
+
+			<small>Meta</small>
+
+			<!-- Color title -->
+			<label class="input">
+				<svg viewBox="0 0 24 24" aria-hidden="true" class="icon">
+					<use href="#iconHashtag" />
+				</svg>
+				<input placeholder="Title" spellcheck="false" autocorrect="false" name="title" id="colorTitleInp"
+					required>
+			</label>
+
+			<!-- Color description -->
+			<label class="input">
+				<svg viewBox="0 0 24 24" aria-hidden="true" class="icon">
+					<use href="#iconInfo" />
+				</svg>
+				<textarea rows="3" placeholder="Info" spellcheck="false" autocorrect="false" name="info"></textarea>
+			</label>
+
+			<small>Colors</small>
+
+			<label class="input input-color input-fancy">
+				<svg viewBox="0 0 24 24" aria-hidden="true" class="icon" fill="currentColor" title="Color preview">
+					<circle cx="12" cy="12" r="12" />
+				</svg>
+				<input type="color">
+				<input type="text" value="#000000" spellcheck="false" autocorrect="false" name="colors" readOnly>
+				<button class="btn btn-icon add-color" title="Duplicate color">
+					<svg viewBox="0 0 24 24" aria-hidden="true" class="icon" fill="currentColor">
+						<use href="#iconDuplicate" />
+					</svg>
+				</button>
+			</label>
+
+			<input type="submit" class="btn dialog-complete-btn" value="Save">
+		</form>
+
+		<button class="btn dialog-close-btn">
+			<svg viewBox="0 0 24 24" class="icon">
+				<use href="#iconClose" />
+			</svg>
+			ESC
+		</button>
+	</div>
+	<!-- /Add Color Palette dialog -->
+
+	<!-- Add Fonts dialog -->
+	<div class="dialog" data-for="font">
+		<form action="/" method="post" class="dialog-content bookmark-add-form">
+			<h1 class="dialog-title">Add Font</h1>
+
+			<input type="hidden" name="type" value="font">
+
+			<small>Font</small>
+
+			<label class="input input-fancy">
+				<svg viewBox="0 0 24 24" aria-hidden="true" class="icon" fill="currentColor">
+					<use href="#iconFont" />
+				</svg>
+				<input type="search" list="googleFontList" placeholder="Font name" spellcheck="false"
+					autocorrect="false" name="font" id="fontInp" required />
+				<datalist id="googleFontList">
+					${fonts.map(font => `<option value="${font}"></option>`).join("")}
+				</datalist>
+			</label>
+
+			<small>Meta</small>
+
+			<!-- Font title -->
+			<label class="input">
+				<svg viewBox="0 0 24 24" aria-hidden="true" class="icon">
+					<use href="#iconHashtag" />
+				</svg>
+				<input placeholder="Title" spellcheck="false" autocorrect="false" name="title" id="fontTitleInp"
+					required>
+			</label>
+
+			<!-- Font description -->
+			<label class="input">
+				<svg viewBox="0 0 24 24" aria-hidden="true" class="icon">
+					<use href="#iconInfo" />
+				</svg>
+				<textarea rows="3" placeholder="Info" spellcheck="false" autocorrect="false" name="info"></textarea>
+			</label>
+
+			<input type="submit" class="btn dialog-complete-btn" value="Save">
+		</form>
+
+		<button class="btn dialog-close-btn">
+			<svg viewBox="0 0 24 24" class="icon">
+				<use href="#iconClose" />
+			</svg>
+			ESC
+		</button>
+	</div>
+	<!-- /Add Fonts dialog -->
+
+	<!-- Bookmark Preview dialog -->
+	<div class="dialog" id="bookmarkPreviewDlg">
+		<div class="dialog-content">
+			<h1 class="dialog-title"><!-- Dynamic Content--></h1>
+			<p class="dialog-bookmark-info"><!-- Dynamic Content --></p>
+			<div class="dialog-bookmark-content"><!-- Dynamic Content --></div>
+
+			<footer>
+				<button class="btn btn-danger" id="bookmarkDelete">
+					<svg viewBox="0 0 24 24" class="icon">
+						<use href="#iconTrash" />
+					</svg>
+					Delete
+				</button>
+
+				<button class="btn" id="bookmarkEdit">
+					<svg viewBox="0 0 24 24" class="icon">
+						<use href="#iconEdit" />
+					</svg>
+					Edit
+				</button>
+			</footer>
+		</div>
+
+		<button class="btn dialog-close-btn">
+			<svg viewBox="0 0 24 24" class="icon">
+				<use href="#iconClose" />
+			</svg>
+			ESC
+		</button>
+	</div>
+	<!-- /Bookmark Preview dialog -->
+
+	<svg class="icons-defs" aria-hidden="true">
+		<defs>
+			<path id="iconEdit"
+				d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125" />
+			<path id="iconLeaf"
+				d="M216-176q-45-45-70.5-104T120-402q0-63 24-124.5T222-642q35-35 86.5-60t122-39.5Q501-756 591.5-759t202.5 7q8 106 5 195t-16.5 160.5q-13.5 71.5-38 125T684-182q-53 53-112.5 77.5T450-80q-65 0-127-25.5T216-176Zm112-16q29 17 59.5 24.5T450-160q46 0 91-18.5t86-59.5q18-18 36.5-50.5t32-85Q709-426 716-500.5t2-177.5q-49-2-110.5-1.5T485-670q-61 9-116 29t-90 55q-45 45-62 89t-17 85q0 59 22.5 103.5T262-246q42-80 111-153.5T534-520q-72 63-125.5 142.5T328-192Zm0 0Zm0 0Z" />
+			<path id="iconImage"
+				d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+			<path id="iconHashtag" d="M5.25 8.25h15m-16.5 7.5h15m-1.8-13.5l-3.9 19.5m-2.1-19.5l-3.9 19.5" />
+			<path id="iconInfo"
+				d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+			<path id="iconTrash"
+				d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+			<path id="iconDuplicate"
+				d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75" />
+			<path id="iconLink"
+				d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
+			<path id="iconClose" d="M6 18L18 6M6 6l12 12" />
+			<path id="iconFont"
+				d="M10.5 21l5.25-11.25L21 21m-9-3h7.5M3 5.621a48.474 48.474 0 016-.371m0 0c1.12 0 2.233.038 3.334.114M9 5.25V3m3.334 2.364C11.176 10.658 7.69 15.08 3 17.502m9.334-12.138c.896.061 1.785.147 2.666.257m-4.589 8.495a18.023 18.023 0 01-3.827-5.802" />
+			<path id="iconPalette"
+				d="M4.098 19.902a3.75 3.75 0 005.304 0l6.401-6.402M6.75 21A3.75 3.75 0 013 17.25V4.125C3 3.504 3.504 3 4.125 3h5.25c.621 0 1.125.504 1.125 1.125v4.072M6.75 21a3.75 3.75 0 003.75-3.75V8.197M6.75 21h13.125c.621 0 1.125-.504 1.125-1.125v-5.25c0-.621-.504-1.125-1.125-1.125h-4.072M10.5 8.197l2.88-2.88c.438-.439 1.15-.439 1.59 0l3.712 3.713c.44.44.44 1.152 0 1.59l-2.879 2.88M6.75 17.25h.008v.008H6.75v-.008z" />
+			<path id="iconAdd" d="M12 4.5v15m7.5-7.5h-15" />
+			<path id="iconSearch" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+			<path id="iconHome"
+				d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+			<path id="iconMoon"
+				d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
+			<path id="iconSun"
+				d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+		</defs>
+	</svg>
+</body>
+
+</html>

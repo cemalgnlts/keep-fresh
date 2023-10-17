@@ -1,0 +1,7 @@
+{
+    "ico": "image/x-icon",
+    "css": "text/css",
+    "js": "application/javascript",
+    "json": "application/json",
+    "woff2": "application/font-woff2"
+}

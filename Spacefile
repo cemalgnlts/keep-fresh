@@ -1,0 +1,10 @@
+# Spacefile Docs: https://go.deta.dev/docs/spacefile/v0
+v: 0
+app_name: "Keep Fresh"
+icon: "./app-icon.png"
+micros:
+    - name: backend
+      src: "."
+      engine: "nodejs16"
+      run: "node --trace-warnings index.js"
+      dev: "npm run dev"

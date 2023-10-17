@@ -1,0 +1,21 @@
+{
+  "name": "keep-fresh",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon --delay 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "dependencies": {
+    "deta": "^2.0.0",
+    "node-html-parser": "^6.1.10"
+  }
+}
