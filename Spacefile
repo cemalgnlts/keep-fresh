@@ -6,5 +6,5 @@ micros:
     - name: backend
       src: "."
       engine: "nodejs16"
-      run: "node --trace-warnings index.js"
+      run: "node --trace-warnings none index.js"
       dev: "npm run dev"

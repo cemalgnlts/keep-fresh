@@ -3,7 +3,7 @@
 	font-family: "Inter";
 	font-style: normal;
 	font-weight: 200;
-	font-display: swap;
+	font-display: fallback;
 	src: url("/assets/fonts/Inter-Light.woff2") format("woff2");
 }
 
@@ -11,7 +11,7 @@
 	font-family: "Inter";
 	font-style: normal;
 	font-weight: 400;
-	font-display: swap;
+	font-display: fallback;
 	src: url("/assets/fonts/Inter-Regular.woff2") format("woff2");
 }
 
@@ -19,7 +19,7 @@
 	font-family: "Inter";
 	font-style: normal;
 	font-weight: 700;
-	font-display: swap;
+	font-display: fallback;
 	src: url("/assets/fonts/Inter-Bold.woff2") format("woff2");
 }
 
@@ -62,7 +62,7 @@
 	--color-ui: #282726;
 	--color-ui-hover: #343331;
 	--color-ui-active: #575653;
-	--color-backdrop: rgba(200 200 200 / 0.2);
+	--color-backdrop: rgba(200 200 200 / 0.3);
 
 	/* --color-red: #AF3029; */
 	--color-green: #66800B;
@@ -357,7 +357,7 @@ main {
 	line-height: 1;
 	text-align: center;
 	padding-top: 20%;
-	font-display: swap;
+	font-display: fallback;
 }
 
 .bookmark-title,

@@ -39,7 +39,12 @@ const closeDialog = async dlg => {
 		fill: "forwards"
 	}).finished;
 
-	dlg.classList.remove("open")
+	dlg.classList.remove("open");
+
+	// Clear
+
+	const dlgForm = dlg.querySelector("form");
+	if(dlgForm) dlgForm.reset();
 
 	const willRemove = dlg.querySelectorAll(".remove-when-dialog-closed");
 	if (willRemove) [...willRemove].forEach(el => el.remove());
@@ -56,39 +61,6 @@ const addBookmarkDlg = document.querySelector("#addBookmarkDialog");
 
 addNewBtn.onclick = () => {
 	openDialog(addBookmarkDlg);
-};
-
-// Init bookmark items
-const addBookmarkCategoryItems = document.querySelector("#addBookmarkCategoryItems");
-addBookmarkCategoryItems.onclick = ev => {
-	const type = ev.target.dataset.type;
-	const dlg = document.querySelector(`.dialog[data-for="${type}"]`);
-
-	closeDialog(document.querySelector(".dialog.open"));
-	openDialog(dlg);
-};
-
-const bookmarkContent = document.querySelector(".content");
-bookmarkContent.onclick = el => {
-	const bookmarkEl = el.target.matches(".bookmark")
-		? el.target
-		: el.target.closest(".bookmark");
-
-	const bookmarkPreviewDlg = document.querySelector("#bookmarkPreviewDlg");
-	const title = bookmarkEl.querySelector(".bookmark-title").textContent;
-	const info = bookmarkEl.querySelector(".bookmark-info").textContent;
-	const previewEl = bookmarkEl.firstElementChild.cloneNode(true);
-
-	bookmarkPreviewDlg.dataset.key = bookmarkEl.dataset.key;
-	bookmarkPreviewDlg.querySelector(".dialog-title").textContent = title;
-	bookmarkPreviewDlg.querySelector(".dialog-bookmark-info").textContent = info;
-
-	const dlgContent = bookmarkPreviewDlg.querySelector(".dialog-bookmark-content");
-
-	previewEl.classList.add("remove-when-dialog-closed");
-	dlgContent.appendChild(previewEl);
-
-	openDialog(bookmarkPreviewDlg);
 };
 
 // Init toggle buttons.
@@ -121,37 +93,46 @@ const initColorInput = inp => {
 		removeColor.onclick = () => inp.remove();
 	}
 
-	addColorFieldBtn.onclick = () => {
-		const clone = inp.cloneNode(true);
-		clone.classList.add("remove-when-dialog-closed");
-
-		const cloneRemoveEl = clone.querySelector(".remove-color");
-		if (!cloneRemoveEl) {
-
-			const removeBtn = document.createElement("button");
-			removeBtn.className = "btn btn-icon remove-color";
-			removeBtn.innerHTML =
-				`<svg viewBox="0 0 24 24" aria-hidden="true" class="icon" fill="currentColor"><use href="#iconTrash"/></svg>`;
-			removeBtn.title = "Remove color";
-
-			clone.querySelector(".add-color").before(removeBtn);
-		}
-
-		initColorInput(clone);
-		inp.after(clone);
-	};
+	addColorFieldBtn.onclick = () => duplicateColorInput(inp);
 };
 
-const inputColors = document.querySelectorAll(".input-color");
-for (const inp of inputColors) {
-	initColorInput(inp);
-}
+/**
+ * @param {HTMLDivElement} prevInputEl Default last element.
+ * @param {String} initialValue Color value.
+ */
+const duplicateColorInput = (prevInputEl, initialValue) => {
+	const inp = prevInputEl || document.querySelector('div[data-for="color-palette"] .input-color:last-of-type');
+	const clone = inp.cloneNode(true);
+	clone.classList.add("remove-when-dialog-closed");
 
-const fontTitleInp = document.querySelector("#fontTitleInp");
+	if(initialValue) {
+		clone.querySelector("svg").style.color = initialValue;
+		clone.querySelector("input[type=color]").value = initialValue;
+		clone.querySelector("input[type=text]").value = initialValue;
+	}
+
+	const cloneRemoveEl = clone.querySelector(".remove-color");
+	if (!cloneRemoveEl) {
+
+		const removeBtn = document.createElement("button");
+		removeBtn.className = "btn btn-icon remove-color";
+		removeBtn.innerHTML =
+			`<svg viewBox="0 0 24 24" aria-hidden="true" class="icon" fill="currentColor"><use href="#iconTrash"/></svg>`;
+		removeBtn.title = "Remove color";
+
+		clone.querySelector(".add-color").before(removeBtn);
+	}
+
+	initColorInput(clone);
+	inp.after(clone);
+};
+
+// Init first input color.
+initColorInput(document.querySelector(".input-color"));
 
 document.querySelector("#fontInp").onchange = ev => {
 	const inp = ev.currentTarget;
-	fontTitleInp.value = inp.value;
+	document.querySelector("#fontTitleInp").value = inp.value;
 };
 
 // Init page fetch operation.
@@ -173,7 +154,40 @@ document.getElementById("fetchPageMetaBtn").onclick = async () => {
 	document.getElementById("linkImageInp").value = res.image;
 };
 
-// Init bookmark add forms.
+// Init bookmark items add forms.
+const addBookmarkCategoryItems = document.querySelector("#addBookmarkCategoryItems");
+addBookmarkCategoryItems.onclick = ev => {
+	const type = ev.target.dataset.type;
+	const dlg = document.querySelector(`.dialog[data-for="${type}"]`);
+
+	closeDialog(document.querySelector(".dialog.open"));
+	openDialog(dlg);
+};
+
+const bookmarkContent = document.querySelector(".content");
+bookmarkContent.onclick = el => {
+	const bookmarkEl = el.target.matches(".bookmark")
+		? el.target
+		: el.target.closest(".bookmark");
+
+	const bookmarkPreviewDlg = document.querySelector("#bookmarkPreviewDlg");
+	const title = bookmarkEl.querySelector(".bookmark-title").textContent;
+	const info = bookmarkEl.querySelector(".bookmark-info").textContent;
+	const previewEl = bookmarkEl.firstElementChild.cloneNode(true);
+
+	bookmarkPreviewDlg.dataset.key = bookmarkEl.dataset.key;
+	bookmarkPreviewDlg.dataset.type = bookmarkEl.dataset.type;
+	bookmarkPreviewDlg.querySelector(".dialog-title").textContent = title;
+	bookmarkPreviewDlg.querySelector(".dialog-bookmark-info").textContent = info;
+
+	const dlgContent = bookmarkPreviewDlg.querySelector(".dialog-bookmark-content");
+
+	previewEl.classList.add("remove-when-dialog-closed");
+	dlgContent.appendChild(previewEl);
+
+	openDialog(bookmarkPreviewDlg);
+};
+
 const addFormBtns = document.querySelectorAll(".bookmark-add-form");
 const handleFormSubmit = (form) => {
 	if (!form.checkValidity()) {
@@ -197,7 +211,7 @@ const handleFormSubmit = (form) => {
 
 	form.classList.add("pending");
 
-	postBookmarkData(data)
+	postBookmarkData(form.action, data)
 		.catch(err => {
 			form.classList.remove("pending");
 			alert(err);
@@ -216,8 +230,8 @@ for (const form of addFormBtns) {
 	};
 }
 
-async function postBookmarkData(data) {
-	const req = await fetch("/api/add", {
+async function postBookmarkData(url, data) {
+	const req = await fetch(url, {
 		method: "POST",
 		headers: { "Content-Type": "application/json" },
 		body: JSON.stringify(data)
@@ -250,6 +264,44 @@ document.getElementById("bookmarkDelete").onclick = async () => {
 	await closeDialog(dlg);
 
 	document.querySelector(`.bookmark[data-key="${key}"]`).remove();
+};
+
+document.getElementById("bookmarkEdit").onclick = async () => {
+	const selectedBookmarkDlg = document.querySelector(".dialog.open");
+	await closeDialog(selectedBookmarkDlg);
+
+	const bookmark = document.querySelector(`.bookmark[data-key="${selectedBookmarkDlg.dataset.key}"]`);
+	const bookmarkType = bookmark.dataset.type;
+
+	const bookmarkDlg = document.querySelector(`.dialog[data-for="${bookmarkType}"]`);
+	const form = bookmarkDlg.querySelector("form");
+
+	form.elements.title.value = bookmark.querySelector(".bookmark-title").textContent;
+	form.elements.info.value = bookmark.querySelector(".bookmark-info").textContent;
+
+	switch (bookmarkType) {
+		case "link":
+			const imageUrl = bookmark.querySelector(".bookmark-preview-link")
+				.style.getPropertyValue("--image")
+				.slice('url("'.length + 1, -2);
+			form.elements.image.value = imageUrl;
+			break;
+		case "color-palette":
+			const colors = Array.from(bookmark.querySelectorAll("[data-color]"), el => el.dataset.color);
+			const first = colors.shift();
+
+			bookmarkDlg.querySelector(".input-color > svg").style.color = first;
+			bookmarkDlg.querySelector("input[type=color]").value = first;
+			bookmarkDlg.querySelector("input[type=text]").value = first;
+
+			colors.forEach(color => duplicateColorInput(null, color));
+			break;
+		case "font":
+			form.elements.font.value = bookmark.querySelector("[data-font]").dataset.font;
+			break;
+	}
+
+	await openDialog(bookmarkDlg);
 };
 
 // Init keys.
