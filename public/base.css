@@ -109,8 +109,12 @@ aside > header {
 	flex-direction: column;
 }
 
-aside > header > h1 {
+aside > header > .brand > .title {
 	display: none;
+}
+
+aside > header > .brand > svg {
+	vertical-align: sub;
 }
 
 aside svg {
@@ -126,22 +130,11 @@ aside > header {
 	align-items: center;
 }
 
-aside > header > h1,
-main > header > h1 {
-	margin: 0;
-}
+aside > header > #drawerBtn { margin-right: var(--space-s); }
 
-aside > header > #drawerBtn {
-	margin-right: var(--space-s);
-}
+main { overflow-y: scroll; }
 
-main {
-	overflow-y: scroll;
-}
-
-.fill {
-	flex-grow: 1;
-}
+.fill { flex-grow: 1; }
 
 .leaf {
 	vertical-align: text-top;
@@ -198,6 +191,10 @@ main {
 	border-radius: var(--radius);
 	background-color: var(--color-ui);
 	transition: background-color 250ms ease-out;
+}
+
+.btn + .btn {
+	margin-left: var(--space-s);
 }
 
 .btn > svg {
@@ -564,7 +561,8 @@ h5 {
 	line-height: 1.3;
 }
 
-h1 {
+h1,
+.title {
 	margin-top: 0;
 	font-size: 1.383rem;
 }
@@ -666,16 +664,13 @@ small,
 		flex-direction: row;
 	}
 
-	aside > header > h1 {
+	aside > header > .brand > .title,
+	aside > nav li .menu-item-text {
 		display: unset;
 	}
 
 	aside svg {
 		width: unset !important;
-	}
-
-	aside > nav li .menu-item-text {
-		display: unset;
 	}
 }
 

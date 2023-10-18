@@ -20,7 +20,7 @@
 <body>
 	<aside class="small">
 		<header>
-			<h1>
+			<div class="brand">
 				<svg width="24" height="24" viewBox="0 -960 960 960" aria-hidden="true" class="leaf">
 					<defs>
 						<linearGradient id="brandGradient">
@@ -31,8 +31,8 @@
 					<path fill="url(#brandGradient)"
 						d="M452-108q-43 0-83-10t-73-32q18-96 69-180.5T490-482q-85 53-146 131.5T258-174q-6-6-12-10.5T234-195q-42-44-65-97.5T146-402q0-63 25-119t69-101q73-73 185.5-95t342.5-9q18 215-5.5 334T665-199q-43 45-98 68t-115 23Z" />
 				</svg>
-				Keep Fresh
-			</h1>
+				<h2 class="title">Keep Fresh</h2>
+			</div>
 
 			<div class="fill"></div>
 
@@ -58,7 +58,7 @@
 				</li>
 			</ul>
 
-			${loggedIn ? `<div class="seperator"></div>
+			${isLoggedIn ? `<div class="seperator"></div>
 			<ul class="menu">
 				<li id="newBookmarkBtn">
 					<svg viewBox="0 0 24 24" aria-hidden="true" class="icon">
@@ -141,18 +141,17 @@
 			<small>Link</small>
 
 			<!-- Website link -->
-			<label class="input input-fancy">
+			<div class="input input-fancy">
 				<svg viewBox="0 0 24 24" aria-hidden="true" class="icon">
 					<use href="#iconLink" />
 				</svg>
-				<input placeholder="https://example.com" spellcheck="false" autocorrect="false" name="url" id="linkInp"
-					required>
+				<input placeholder="https://example.com" spellcheck="false" name="url" id="linkInp" required>
 				<button class="btn btn-icon" title="Auto fill" id="fetchPageMetaBtn">
 					<svg viewBox="0 0 24 24" aria-hidden="true" class="icon">
 						<use href="#iconSearch" />
 					</svg>
 				</button>
-			</label>
+			</div>
 
 			<small>Meta</small>
 
@@ -161,8 +160,7 @@
 				<svg viewBox="0 0 24 24" aria-hidden="true" class="icon">
 					<use href="#iconImage" />
 				</svg>
-				<input placeholder="https://example.com/favicon.ico" spellcheck="false" autocorrect="false" name="image"
-					id="linkImageInp">
+				<input placeholder="https://example.com/favicon.ico" spellcheck="false" name="image" id="linkImageInp">
 			</label>
 
 			<!-- Website title -->
@@ -170,8 +168,7 @@
 				<svg viewBox="0 0 24 24" aria-hidden="true" class="icon">
 					<use href="#iconHashtag" />
 				</svg>
-				<input placeholder="Title" spellcheck="false" autocorrect="false" name="title" id="linkTitleInp"
-					required>
+				<input placeholder="Title" spellcheck="false" name="title" id="linkTitleInp" required>
 			</label>
 
 			<!-- Website description -->
@@ -179,8 +176,7 @@
 				<svg viewBox="0 0 24 24" aria-hidden="true" class="icon">
 					<use href="#iconInfo" />
 				</svg>
-				<textarea rows="3" placeholder="Info" spellcheck="false" autocorrect="false" name="info"
-					id="linkInfoInp"></textarea>
+				<textarea rows="3" placeholder="Info" spellcheck="false" name="info" id="linkInfoInp"></textarea>
 			</label>
 
 			<input type="submit" class="btn dialog-complete-btn" value="Save">
@@ -209,8 +205,7 @@
 				<svg viewBox="0 0 24 24" aria-hidden="true" class="icon">
 					<use href="#iconHashtag" />
 				</svg>
-				<input placeholder="Title" spellcheck="false" autocorrect="false" name="title" id="colorTitleInp"
-					required>
+				<input placeholder="Title" spellcheck="false" name="title" id="colorTitleInp" required>
 			</label>
 
 			<!-- Color description -->
@@ -218,23 +213,23 @@
 				<svg viewBox="0 0 24 24" aria-hidden="true" class="icon">
 					<use href="#iconInfo" />
 				</svg>
-				<textarea rows="3" placeholder="Info" spellcheck="false" autocorrect="false" name="info"></textarea>
+				<textarea rows="3" placeholder="Info" spellcheck="false" name="info"></textarea>
 			</label>
 
 			<small>Colors</small>
 
-			<label class="input input-color input-fancy">
-				<svg viewBox="0 0 24 24" aria-hidden="true" class="icon" fill="currentColor" title="Color preview">
+			<div class="input input-color input-fancy">
+				<svg viewBox="0 0 24 24" aria-hidden="true" class="icon" fill="currentColor">
 					<circle cx="12" cy="12" r="12" />
 				</svg>
 				<input type="color">
-				<input type="text" value="#000000" spellcheck="false" autocorrect="false" name="colors" readOnly>
+				<input type="text" value="#000000" spellcheck="false" name="colors" readOnly>
 				<button class="btn btn-icon add-color" title="Duplicate color">
 					<svg viewBox="0 0 24 24" aria-hidden="true" class="icon" fill="currentColor">
 						<use href="#iconDuplicate" />
 					</svg>
 				</button>
-			</label>
+			</div>
 
 			<input type="submit" class="btn dialog-complete-btn" value="Save">
 		</form>
@@ -261,8 +256,8 @@
 				<svg viewBox="0 0 24 24" aria-hidden="true" class="icon" fill="currentColor">
 					<use href="#iconFont" />
 				</svg>
-				<input type="search" list="googleFontList" placeholder="Font name" spellcheck="false"
-					autocorrect="false" name="font" id="fontInp" required />
+				<input type="search" list="googleFontList" placeholder="Font name" spellcheck="false" name="font"
+					id="fontInp" required>
 				<datalist id="googleFontList">
 					${fonts.map(font => `<option value="${font}"></option>`).join("")}
 				</datalist>
@@ -275,8 +270,7 @@
 				<svg viewBox="0 0 24 24" aria-hidden="true" class="icon">
 					<use href="#iconHashtag" />
 				</svg>
-				<input placeholder="Title" spellcheck="false" autocorrect="false" name="title" id="fontTitleInp"
-					required>
+				<input placeholder="Title" spellcheck="false" name="title" id="fontTitleInp" required>
 			</label>
 
 			<!-- Font description -->
@@ -284,7 +278,7 @@
 				<svg viewBox="0 0 24 24" aria-hidden="true" class="icon">
 					<use href="#iconInfo" />
 				</svg>
-				<textarea rows="3" placeholder="Info" spellcheck="false" autocorrect="false" name="info"></textarea>
+				<textarea rows="3" placeholder="Info" spellcheck="false" name="info"></textarea>
 			</label>
 
 			<input type="submit" class="btn dialog-complete-btn" value="Save">
@@ -302,12 +296,12 @@
 	<!-- Bookmark Preview dialog -->
 	<div class="dialog" id="bookmarkPreviewDlg">
 		<div class="dialog-content">
-			<h1 class="dialog-title"><!-- Dynamic Content--></h1>
+			<h1 class="dialog-title">Bookmark Title</h1>
 			<p class="dialog-bookmark-info"><!-- Dynamic Content --></p>
 			<div class="dialog-bookmark-content"><!-- Dynamic Content --></div>
 
-			${isLoggedIn ? `
 			<footer>
+				${isLoggedIn ? `
 				<button class="btn btn-danger" id="bookmarkDelete">
 					<svg viewBox="0 0 24 24" class="icon">
 						<use href="#iconTrash" />
@@ -315,13 +309,16 @@
 					Delete
 				</button>
 
+				<div class="fill"></div>
+
 				<button class="btn" id="bookmarkEdit">
 					<svg viewBox="0 0 24 24" class="icon">
 						<use href="#iconEdit" />
 					</svg>
 					Edit
 				</button>
-			</footer>` : ""}
+				` : `<div class="fill"></div>`}
+			</footer>
 		</div>
 
 		<button class="btn dialog-close-btn">
@@ -335,6 +332,7 @@
 
 	<svg class="icons-defs" aria-hidden="true">
 		<defs>
+			<path id="iconArrowUpRight" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" />
 			<path id="iconEdit"
 				d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125" />
 			<path id="iconLeaf"

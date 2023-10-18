@@ -25,7 +25,7 @@ function getMimeType(file) {
 }
 
 /** @param {http.ServerResponse} res */
-async function handleIndex(res, loggedIn) {
+async function handleIndex(res, isLoggedIn) {
     const filePath = path.join(VIEWS, "index.html");
 
     await fs.access(filePath);
@@ -41,14 +41,20 @@ async function handleIndex(res, loggedIn) {
     const args = [
         items,
         fontList,
-        loggedIn,
+        isLoggedIn,
         process.env.APP_TITLE
     ];
 
-    const html = renderTemplate(template, "bookmarks,fonts,loggedIn,appTitle", args);
+    const html = renderTemplate(template, "bookmarks,fonts,isLoggedIn,appTitle", args);
 
     res.writeHead(200, { "Content-Type": "text/html" });
     res.write(html);
+}
+
+async function parseMetadata(res, url) {
+    const metadata = await getPageOGPMetadata(url);
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.write(JSON.stringify(metadata));
 }
 
 /**
@@ -126,19 +132,20 @@ async function handleServer(req, res) {
 
     switch (pathname) {
         case "/":
-            const loggedIn = req.headers["referer"] === "https://deta.space/" || process.env.DETA_SPACE_APP_HOSTNAME.startsWith("localhost");
-            handleIndex(res, loggedIn)
+            const isLoggedIn = req.headers["referer"] === "https://deta.space/" ||
+                process.env.DETA_SPACE_APP_HOSTNAME.startsWith("localhost");
+
+            await handleIndex(res, isLoggedIn)
                 .catch(err => res.writeHead(500, { "x-error": err.toString() }))
                 .finally(() => res.end());
             break;
         case "/api/ogp":
-            const metadata = await getPageOGPMetadata(searchParams.get("url"));
-            res.writeHead(200, { "Content-Type": "application/json" });
-            res.write(JSON.stringify(metadata));
-            res.end();
+            await parseMetadata(res, searchParams.get("url"))
+                .catch(err => res.writeHead(500, { "x-error": err.toString() }))
+                .finally(() => res.end())
             break;
         case "/api/delete":
-            deleteBookmark(req, res, searchParams.get("key"))
+            await deleteBookmark(req, res, searchParams.get("key"))
                 .catch(err => res.writeHead(500, { "x-error": err.toString() }))
                 .finally(() => res.end());
             break;
@@ -150,13 +157,16 @@ async function handleServer(req, res) {
                 return;
             }
 
+            const onEnd = async () => {
+                body = Buffer.concat(body).toString();
+
+                await addBookmark(body, res)
+                    .catch(err => res.writeHead(500, { "x-error": err.toString() }))
+                    .finally(() => res.end());
+            };
+
             req.on("data", (chunk) => body.push(chunk))
-                .on("end", () => {
-                    body = Buffer.concat(body).toString();
-                    addBookmark(body, res)
-                        .catch(err => res.writeHead(500, { "x-error": err.toString() }))
-                        .finally(() => res.end());
-                });
+                .on("end", onEnd);
             break;
         default:
             await handleStaticFiles(req, res);

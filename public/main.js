@@ -9,7 +9,7 @@ themeBtn.onclick = () => {
 // Init dialogs.
 const dialogs = document.querySelectorAll(".dialog");
 for (const dlgEl of dialogs) {
-	dlgEl.onclick = (ev) => ev.target === dlgEl && closeDialog(dlgEl);
+	dlgEl.addEventListener("click", ev => ev.target === dlgEl && closeDialog(dlgEl));
 }
 
 const openDialog = async dlg => {
@@ -199,6 +199,20 @@ bookmarkContent.onclick = el => {
 	previewEl.classList.add("remove-when-dialog-closed");
 	dlgContent.appendChild(previewEl);
 
+	if (bookmarkEl.dataset.url) {
+		const footer = bookmarkPreviewDlg.querySelector("footer");
+
+		const anchor = document.createElement("a");
+		anchor.className = "btn remove-when-dialog-closed";
+		anchor.href = bookmarkEl.dataset.url;
+		anchor.target = "_blank";
+		anchor.innerHTML = `<span>Open</span>
+				<svg viewBox="0 0 24 24" class="icon" style="vertical-align: middle">
+					<use href="#iconArrowUpRight" />
+				</svg>`;
+		footer.appendChild(anchor);
+	}
+
 	openDialog(bookmarkPreviewDlg);
 };
 
@@ -213,6 +227,8 @@ const handleFormSubmit = (form) => {
 		return;
 	}
 
+	form.classList.add("pending");
+
 	const formData = new FormData(form);
 	const data = Array.from(formData).reduce((acc, [key, val]) => {
 		if (acc[key]) {
@@ -222,8 +238,6 @@ const handleFormSubmit = (form) => {
 
 		return acc;
 	}, {});
-
-	form.classList.add("pending");
 
 	postBookmarkData(form.action, data)
 		.catch(err => {
