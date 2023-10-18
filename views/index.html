@@ -306,6 +306,7 @@
 			<p class="dialog-bookmark-info"><!-- Dynamic Content --></p>
 			<div class="dialog-bookmark-content"><!-- Dynamic Content --></div>
 
+			${isLoggedIn ? `
 			<footer>
 				<button class="btn btn-danger" id="bookmarkDelete">
 					<svg viewBox="0 0 24 24" class="icon">
@@ -320,7 +321,7 @@
 					</svg>
 					Edit
 				</button>
-			</footer>
+			</footer>` : ""}
 		</div>
 
 		<button class="btn dialog-close-btn">

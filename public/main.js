@@ -44,7 +44,7 @@ const closeDialog = async dlg => {
 	// Clear
 
 	const dlgForm = dlg.querySelector("form");
-	if(dlgForm) dlgForm.reset();
+	if (dlgForm) dlgForm.reset();
 
 	const willRemove = dlg.querySelectorAll(".remove-when-dialog-closed");
 	if (willRemove) [...willRemove].forEach(el => el.remove());
@@ -59,9 +59,11 @@ for (const el of dlgCloseEls) {
 const addNewBtn = document.querySelector("#newBookmarkBtn");
 const addBookmarkDlg = document.querySelector("#addBookmarkDialog");
 
-addNewBtn.onclick = () => {
-	openDialog(addBookmarkDlg);
-};
+if (addNewBtn) {
+	addNewBtn.onclick = () => {
+		openDialog(addBookmarkDlg);
+	};
+}
 
 // Init toggle buttons.
 const btnIconToggleEls = document.querySelectorAll(".btn-icon-toggle");
@@ -105,7 +107,7 @@ const duplicateColorInput = (prevInputEl, initialValue) => {
 	const clone = inp.cloneNode(true);
 	clone.classList.add("remove-when-dialog-closed");
 
-	if(initialValue) {
+	if (initialValue) {
 		clone.querySelector("svg").style.color = initialValue;
 		clone.querySelector("input[type=color]").value = initialValue;
 		clone.querySelector("input[type=text]").value = initialValue;
@@ -141,7 +143,7 @@ document.getElementById("fetchPageMetaBtn").onclick = async (ev) => {
 
 	if (url.length === 0 || url.length < 4) return alert("Wrong url.");
 
-	if(!url.startsWith("http")) {
+	if (!url.startsWith("http")) {
 		url = `https://${url}`;
 		document.getElementById("linkInp").value = url;
 	}
@@ -256,76 +258,80 @@ async function postBookmarkData(url, data) {
 	location.href = "/";
 }
 
-document.getElementById("bookmarkDelete").onclick = async () => {
-	if (!confirm("Do you want to delete this bookmark?")) return;
+const bookmarkDeleteBtn = document.getElementById("bookmarkDelete");
 
-	const dlg = document.querySelector(".dialog.open");
-	const key = dlg.dataset.key;
-	dlg.classList.add("pending");
+if (bookmarkDeleteBtn) {
+	bookmarkDeleteBtn.onclick = async () => {
+		if (!confirm("Do you want to delete this bookmark?")) return;
 
-	const req = await fetch(`/api/delete?key=${key}`, { method: "DELETE" });
+		const dlg = document.querySelector(".dialog.open");
+		const key = dlg.dataset.key;
+		dlg.classList.add("pending");
 
-	if (!req.ok) {
-		alert(req.headers.get("x-error") || "Error occured");
+		const req = await fetch(`/api/delete?key=${key}`, { method: "DELETE" });
+
+		if (!req.ok) {
+			alert(req.headers.get("x-error") || "Error occured");
+			dlg.classList.remove("pending");
+			return;
+		}
+
 		dlg.classList.remove("pending");
-		return;
-	}
 
-	dlg.classList.remove("pending");
+		await closeDialog(dlg);
 
-	await closeDialog(dlg);
+		document.querySelector(`.bookmark[data-key="${key}"]`).remove();
+	};
 
-	document.querySelector(`.bookmark[data-key="${key}"]`).remove();
-};
+	document.getElementById("bookmarkEdit").onclick = async () => {
+		const selectedBookmarkDlg = document.querySelector(".dialog.open");
+		await closeDialog(selectedBookmarkDlg);
 
-document.getElementById("bookmarkEdit").onclick = async () => {
-	const selectedBookmarkDlg = document.querySelector(".dialog.open");
-	await closeDialog(selectedBookmarkDlg);
+		const bookmarkKey = selectedBookmarkDlg.dataset.key;
 
-	const bookmarkKey = selectedBookmarkDlg.dataset.key;
+		const bookmark = document.querySelector(`.bookmark[data-key="${bookmarkKey}"]`);
+		const bookmarkType = bookmark.dataset.type;
 
-	const bookmark = document.querySelector(`.bookmark[data-key="${bookmarkKey}"]`);
-	const bookmarkType = bookmark.dataset.type;
+		const bookmarkDlg = document.querySelector(`.dialog[data-for="${bookmarkType}"]`);
+		const form = bookmarkDlg.querySelector("form");
 
-	const bookmarkDlg = document.querySelector(`.dialog[data-for="${bookmarkType}"]`);
-	const form = bookmarkDlg.querySelector("form");
+		form.elements.title.value = bookmark.querySelector(".bookmark-title").textContent;
+		form.elements.info.value = bookmark.querySelector(".bookmark-info").textContent;
 
-	form.elements.title.value = bookmark.querySelector(".bookmark-title").textContent;
-	form.elements.info.value = bookmark.querySelector(".bookmark-info").textContent;
+		switch (bookmarkType) {
+			case "link":
+				const imageUrl = bookmark.querySelector(".bookmark-preview-link")
+					.style.getPropertyValue("--image")
+					.slice('url("'.length + 1, -2);
 
-	switch (bookmarkType) {
-		case "link":
-			const imageUrl = bookmark.querySelector(".bookmark-preview-link")
-				.style.getPropertyValue("--image")
-				.slice('url("'.length + 1, -2);
-			
-			form.elements.image.value = imageUrl;
-			form.elements.url.value = bookmark.dataset.url;
-			break;
-		case "color-palette":
-			const colors = Array.from(bookmark.querySelectorAll("[data-color]"), el => el.dataset.color);
-			const first = colors.shift();
+				form.elements.image.value = imageUrl;
+				form.elements.url.value = bookmark.dataset.url;
+				break;
+			case "color-palette":
+				const colors = Array.from(bookmark.querySelectorAll("[data-color]"), el => el.dataset.color);
+				const first = colors.shift();
 
-			bookmarkDlg.querySelector(".input-color > svg").style.color = first;
-			bookmarkDlg.querySelector("input[type=color]").value = first;
-			bookmarkDlg.querySelector("input[type=text]").value = first;
+				bookmarkDlg.querySelector(".input-color > svg").style.color = first;
+				bookmarkDlg.querySelector("input[type=color]").value = first;
+				bookmarkDlg.querySelector("input[type=text]").value = first;
 
-			colors.forEach(color => duplicateColorInput(null, color));
-			break;
-		case "font":
-			form.elements.font.value = bookmark.querySelector("[data-font]").dataset.font;
-			break;
-	}
+				colors.forEach(color => duplicateColorInput(null, color));
+				break;
+			case "font":
+				form.elements.font.value = bookmark.querySelector("[data-font]").dataset.font;
+				break;
+		}
 
-	await openDialog(bookmarkDlg);
+		await openDialog(bookmarkDlg);
 
-	const bookmarkKeyInput = document.createElement("input");
-	bookmarkKeyInput.className = "remove-when-dialog-closed";
-	bookmarkKeyInput.type = "hidden";
-	bookmarkKeyInput.name = "key";
-	bookmarkKeyInput.value = bookmarkKey;
-	form.appendChild(bookmarkKeyInput);
-};
+		const bookmarkKeyInput = document.createElement("input");
+		bookmarkKeyInput.className = "remove-when-dialog-closed";
+		bookmarkKeyInput.type = "hidden";
+		bookmarkKeyInput.name = "key";
+		bookmarkKeyInput.value = bookmarkKey;
+		form.appendChild(bookmarkKeyInput);
+	};
+}
 
 // Init keys.
 document.onkeyup = ev => {
