@@ -58,8 +58,7 @@
 				</li>
 			</ul>
 
-			<div class="seperator"></div>
-
+			${loggedIn ? `<div class="seperator"></div>
 			<ul class="menu">
 				<li id="newBookmarkBtn">
 					<svg viewBox="0 0 24 24" aria-hidden="true" class="icon">
@@ -67,18 +66,19 @@
 					</svg>
 					<span class="menu-item-text">Add</span>
 				</li>
-			</ul>
+			</ul>` : ""}
 		</nav>
 	</aside>
 
 	<main>
 		<header>
-			<h1>Bookmarks</h1>
+			<h1>${appTitle ? appTitle : ""}</h1>
 		</header>
 
 		<section class="content">
 			${bookmarks.map(bookmark => `
-			<figure class="bookmark" data-type="${bookmark.type}" data-key="${bookmark.key}">
+			<figure class="bookmark" data-type="${bookmark.type}" data-key="${bookmark.key}" ${bookmark.url ?
+				`data-url="${bookmark.url}" ` : "" }>
 				<div class="bookmark-preview-${bookmark.type}" ${bookmark.image ?
 					`style="--image: url('${bookmark.image}')" ` : "" } ${bookmark.font ?
 					`style="--font: '${bookmark.font}'" data-font="${bookmark.font}" ` : "" }>

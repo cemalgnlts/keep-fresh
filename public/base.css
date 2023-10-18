@@ -205,6 +205,7 @@ main {
 	height: 18px;
 	margin-right: var(--space-xs);
 	vertical-align: bottom;
+	pointer-events: none;
 }
 
 .btn:hover { background-color: var(--color-ui-hover); }
@@ -319,8 +320,9 @@ main {
 
 .bookmark-preview-link {
 	background-image: var(--image);
-	background-size: cover;
+	background-size:  cover;
 	background-position: center;
+	background-repeat: no-repeat;
 }
 
 .bookmark-preview-color-palette {

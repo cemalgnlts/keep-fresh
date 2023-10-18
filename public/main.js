@@ -136,22 +136,34 @@ document.querySelector("#fontInp").onchange = ev => {
 };
 
 // Init page fetch operation.
-document.getElementById("fetchPageMetaBtn").onclick = async () => {
-	const url = document.getElementById("linkInp").value.trim();
+document.getElementById("fetchPageMetaBtn").onclick = async (ev) => {
+	let url = document.getElementById("linkInp").value.trim();
 
 	if (url.length === 0 || url.length < 4) return alert("Wrong url.");
 
+	if(!url.startsWith("http")) {
+		url = `https://${url}`;
+		document.getElementById("linkInp").value = url;
+	}
+
 	const params = new URLSearchParams(`url=${url}`);
+	const form = ev.target.form;
+	form.classList.add("pending");
 
 	const req = await fetch(`/api/ogp?${params.toString()}`);
 
-	if (!req.ok) return alert("Request error");
+	if (!req.ok || !req.headers.get("content-type").includes("application/json")) {
+		form.classList.remove("pending");
+		return alert(req.headers.get("x-error") || "Request error");
+	}
 
 	const res = await req.json();
 
 	document.getElementById("linkTitleInp").value = res.title;
 	document.getElementById("linkInfoInp").value = res.description;
 	document.getElementById("linkImageInp").value = res.image;
+
+	form.classList.remove("pending");
 };
 
 // Init bookmark items add forms.
@@ -237,7 +249,7 @@ async function postBookmarkData(url, data) {
 		body: JSON.stringify(data)
 	});
 
-	if (!req.ok) throw Error("Request error.");
+	if (!req.ok) throw Error(req.head.get("x-error") || "Request error.");
 
 	await closeDialog(document.querySelector(".dialog.open"));
 
@@ -254,7 +266,7 @@ document.getElementById("bookmarkDelete").onclick = async () => {
 	const req = await fetch(`/api/delete?key=${key}`, { method: "DELETE" });
 
 	if (!req.ok) {
-		alert("Error occured");
+		alert(req.headers.get("x-error") || "Error occured");
 		dlg.classList.remove("pending");
 		return;
 	}
@@ -270,7 +282,9 @@ document.getElementById("bookmarkEdit").onclick = async () => {
 	const selectedBookmarkDlg = document.querySelector(".dialog.open");
 	await closeDialog(selectedBookmarkDlg);
 
-	const bookmark = document.querySelector(`.bookmark[data-key="${selectedBookmarkDlg.dataset.key}"]`);
+	const bookmarkKey = selectedBookmarkDlg.dataset.key;
+
+	const bookmark = document.querySelector(`.bookmark[data-key="${bookmarkKey}"]`);
 	const bookmarkType = bookmark.dataset.type;
 
 	const bookmarkDlg = document.querySelector(`.dialog[data-for="${bookmarkType}"]`);
@@ -284,7 +298,9 @@ document.getElementById("bookmarkEdit").onclick = async () => {
 			const imageUrl = bookmark.querySelector(".bookmark-preview-link")
 				.style.getPropertyValue("--image")
 				.slice('url("'.length + 1, -2);
+			
 			form.elements.image.value = imageUrl;
+			form.elements.url.value = bookmark.dataset.url;
 			break;
 		case "color-palette":
 			const colors = Array.from(bookmark.querySelectorAll("[data-color]"), el => el.dataset.color);
@@ -302,6 +318,13 @@ document.getElementById("bookmarkEdit").onclick = async () => {
 	}
 
 	await openDialog(bookmarkDlg);
+
+	const bookmarkKeyInput = document.createElement("input");
+	bookmarkKeyInput.className = "remove-when-dialog-closed";
+	bookmarkKeyInput.type = "hidden";
+	bookmarkKeyInput.name = "key";
+	bookmarkKeyInput.value = bookmarkKey;
+	form.appendChild(bookmarkKeyInput);
 };
 
 // Init keys.

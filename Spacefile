@@ -6,5 +6,12 @@ micros:
     - name: backend
       src: "."
       engine: "nodejs16"
-      run: "node --trace-warnings none index.js"
+      run: "node index.js"
       dev: "npm run dev"
+      public_routes:
+        - "/(?!(api))*"
+      presets:
+        env:
+          - name: APP_TITLE
+            description: "App title"
+            default: "Bookmarks"

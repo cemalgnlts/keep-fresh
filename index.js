@@ -24,8 +24,8 @@ function getMimeType(file) {
     return mimeTypes[ext];
 }
 
-/** @param {http.ServerResponse} res  */
-async function handleIndex(res) {
+/** @param {http.ServerResponse} res */
+async function handleIndex(res, loggedIn) {
     const filePath = path.join(VIEWS, "index.html");
 
     await fs.access(filePath);
@@ -38,25 +38,39 @@ async function handleIndex(res) {
         items = items.sort((a, b) => new Date(+b.createdAt) - new Date(+a.createdAt));
     }
 
-    const html = renderTemplate(template, "bookmarks,fonts", [items, fontList]);
+    const args = [
+        items,
+        fontList,
+        loggedIn,
+        process.env.APP_TITLE
+    ];
+
+    const html = renderTemplate(template, "bookmarks,fonts,loggedIn,appTitle", args);
 
     res.writeHead(200, { "Content-Type": "text/html" });
     res.write(html);
 }
 
 /**
- * 
+ * If the body argument contains the key value, it asks to update the bookmark, if not, it asks to insert it.
  * @param {String} rawBody
  * @param {http.ServerResponse} res 
  */
 async function addBookmark(rawBody, res) {
     const body = JSON.parse(rawBody);
-    body.createdAt = `${Date.now()}`;
 
     if (!body.type || !body.title
         || (!body.colors && !body.url && !body.font)) throw Error("Wrong bookmark data.");
 
-    await base.put(body);
+    if (body.key) {
+        const key = body.key;
+        delete body.key;
+
+        await base.update(body, key);
+    } else {
+        body.createdAt = `${Date.now()}`;
+        await base.put(body);
+    }
 
     res.writeHead(201);
 }
@@ -73,7 +87,7 @@ async function deleteBookmark(req, res, key) {
         return;
     }
 
-    if(!key) throw Error("Key not found!");
+    if (!key) throw Error("Key not found!");
 
     await base.delete(key);
 
@@ -112,8 +126,9 @@ async function handleServer(req, res) {
 
     switch (pathname) {
         case "/":
-            handleIndex(res)
-                .catch(() => res.writeHead(500))
+            const loggedIn = req.headers["referer"] === "https://deta.space/" || process.env.DETA_SPACE_APP_HOSTNAME.startsWith("localhost");
+            handleIndex(res, loggedIn)
+                .catch(err => res.writeHead(500, { "x-error": err.toString() }))
                 .finally(() => res.end());
             break;
         case "/api/ogp":
@@ -124,7 +139,7 @@ async function handleServer(req, res) {
             break;
         case "/api/delete":
             deleteBookmark(req, res, searchParams.get("key"))
-                .catch(() => res.write(500))
+                .catch(err => res.writeHead(500, { "x-error": err.toString() }))
                 .finally(() => res.end());
             break;
         case "/api/add":
@@ -139,7 +154,7 @@ async function handleServer(req, res) {
                 .on("end", () => {
                     body = Buffer.concat(body).toString();
                     addBookmark(body, res)
-                        .catch(err => res.writeHead(500))
+                        .catch(err => res.writeHead(500, { "x-error": err.toString() }))
                         .finally(() => res.end());
                 });
             break;
