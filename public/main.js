@@ -199,12 +199,13 @@ bookmarkContent.onclick = el => {
 	previewEl.classList.add("remove-when-dialog-closed");
 	dlgContent.appendChild(previewEl);
 
-	if (bookmarkEl.dataset.url) {
+	if (bookmarkEl.dataset.url || bookmarkEl.dataset.type === "font") {
 		const footer = bookmarkPreviewDlg.querySelector("footer");
+		const url = bookmarkEl.dataset.url || `https://fonts.google.com/specimen/${bookmarkEl.querySelector("[data-font]").dataset.font}`;
 
 		const anchor = document.createElement("a");
 		anchor.className = "btn remove-when-dialog-closed";
-		anchor.href = bookmarkEl.dataset.url;
+		anchor.href = url;
 		anchor.target = "_blank";
 		anchor.innerHTML = `<span>Open</span>
 				<svg viewBox="0 0 24 24" class="icon" style="vertical-align: middle">

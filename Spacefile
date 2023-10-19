@@ -6,7 +6,7 @@ micros:
     - name: backend
       src: "."
       engine: "nodejs16"
-      run: "node index.js"
+      run: "node --no-warnings index.js"
       dev: "npm run dev"
       public_routes:
         - "/(?!(api))*"

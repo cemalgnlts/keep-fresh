@@ -5,7 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "node --trace-warnings none index.js",
+    "start": "node --no-warnings index.js",
     "dev": "nodemon --delay 1"
   },
   "keywords": [],
